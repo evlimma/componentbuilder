@@ -2,6 +2,8 @@
 
 namespace evlimma\ComponentBuilder;
 
+use EvLimma\ComponentBuilder\GenericFunction;
+
 class ComponentBuilder
 {
     use GenericFunction;
