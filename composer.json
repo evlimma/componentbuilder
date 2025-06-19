@@ -1,0 +1,34 @@
+{
+    "name": "evlimma/componentbuilder",
+    "description": "Generate HTML form components with embedded logic | Gera componentes de formulário HTML com lógica embutida",
+    "type": "library",
+    "keywords": [
+        "Evlimma",
+        "CodigoSpace",
+        "componentbuilder",
+        "gera",
+        "componentes",
+        "html"
+    ],
+    "homepage": "http://www.codigospace.com.br",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Everton Lima",
+            "email": "contato@codigospace.com.br",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "EvLimma\\ComponentBuilder\\": "src/"
+        }
+    }
+}
+
+
+
+
