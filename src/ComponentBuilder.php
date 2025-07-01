@@ -87,12 +87,13 @@ class ComponentBuilder
         ?string $attrNew = null,
         ?bool $btUpload = false,
         ?string $btNewTable = null,
-        array $attributes = []
+        array $attributes = [],
+        ?string $placeholder = null,
+        string $requiredView = "*"
     ) {
-        $asterisco = ($required) ? "*" : "";
+        $asterisco = ($required) ? $requiredView : "";
         $requiredIf = ($required) ? "Sim" : "";
         $descolorido = (!empty($disabledType)) ? "caixaTransp" : "";
-        $typeIf = ($type === "moeda" or $type === "km") ? "text" : $type;
         $maskKm = ($type === "km") ? "maskKm" : null;
         $corFonteVermelha = str_contains($classExtra ?? '', "fonteGeralVermelho") ? "fonteGeralVermelho" : "";
         $corFonteVerde = str_contains($classExtra ?? '', "fonteGeralVerde") ? "fonteGeralVerde" : "";
@@ -101,10 +102,12 @@ class ComponentBuilder
         $titleQuestion = ($this->right($title, 1) === "?") ? $title : $title . ":";
         $descoloridoFile = null;
 
+        $typeIf = in_array($type, ["moeda", "km"]) ? "text" : $type;
+        $inputmode = ($type === "number") ? "inputmode='numeric' pattern='[0-9]*'" : "";
+
         $activeIconLeft = ($iconLeft) ? "iconLeft" : "";
         $iconLeftImg = ($iconLeft) ? "url(\"{$iconLeft}\")" : "";
 
-        // Concatena os atributos extras no input
         $extraAttributes = "";
         foreach ($attributes as $attr => $value) {
             $extraAttributes .= "{$attr}='{$value}' ";
@@ -138,7 +141,7 @@ class ComponentBuilder
         }
 
         if ($title) {
-            $render .= "<label class='labelForm {$descolorido}'>";
+            $render .= "<label for='in{$nameIn}' class='labelForm {$descolorido}'>";
             $render .= ($btNewTable ? "<a href='{$btNewTable}' target='_blank' class='abrirNovaAba'>{$asterisco}{$title}:</a>" : "{$asterisco}{$titleQuestion}");
             $render .= "</label>";
         }
@@ -154,13 +157,15 @@ class ComponentBuilder
                 . "</textarea>";
         } else {
             $render .= "<input style='background-image: {$iconLeftImg};'"
-                . "type='{$typeIf}' id='in{$nameIn}' "
+                . "type='{$typeIf}' "
+                . "id='in{$nameIn}' "
                 . "class='inputForm {$activeIconLeft} {$iconRight} {$classExtra} " . ($passwordRevelation ? "icoRight" : "") . " {$descolorido} {$descoloridoFile} " . (($maskMoeda) ? "maskMoney" : "") . " {$maskKm}' "
-                . "name='in{$nameIn}' {$disabledType} {$autoCompleteHTML} "
+                . "name='in{$nameIn}' "
                 . "obrigatorio='{$requiredIf}' "
+                . "placeholder='{$placeholder}' "
                 . "bloqEnv='{$requiredIf}' "
                 . "value='{$inValue}' "
-                . "{$extraAttributes} />";
+                . "{$disabledType} {$autoCompleteHTML} {$extraAttributes} {$inputmode} />";
         }
 
         $render .= (!$title ? "" : "</div>");
@@ -168,21 +173,6 @@ class ComponentBuilder
         return $render;
     }
 
-
-    /**
-     * 
-     * @param string $title
-     * @param string $nameIn
-     * @param string $urlAjax
-     * @param string|null $inSeq
-     * @param string|null $inValue
-     * @param bool $required
-     * @param string|null $disabledType         $disabledType pode ser 'disabled' ou 'readonly'
-     * @param string|null $classExtra
-     * @param string|null $classPrincipal
-     * @param bool $typeSelect
-     * @return type
-     */
     public function blocSearchInput(
         string $nameIn,
         string $urlAjax,
@@ -196,9 +186,11 @@ class ComponentBuilder
         ?string $idFilter = null,
         bool $typeSelect = false,
         bool $megaPopup = false,
-        ?string $placeholder = null
+        ?string $placeholder = null,
+        string $requiredView = "*"
     ) {
-        $asterisco = ($required) ? "*" : "";
+        $disabledType = in_array($disabledType, ['disabled', 'readonly']) ? $disabledType : "";
+        $asterisco = ($required) ? $requiredView : "";
         $requiredIf = ($required) ? "Sim" : "";
         $descolorido = ($disabledType != "") ? "caixaTransp" : "";
         $pesquisarDbJs = ($disabledType) ? "" : "PesquisarDbJs";
@@ -230,23 +222,6 @@ class ComponentBuilder
         return $render;
     }
 
-
-
-    /**
-     * 
-     * @param string $nameIn
-     * @param string $urlAjax
-     * @param string $title
-     * @param string|null $inSeq
-     * @param string|null $inValue
-     * @param bool $required
-     * @param string|null $disabledtype         $disabledtype pode ser 'disabled' ou 'readonly'
-     * @param string|null $classExtra
-     * @param string|null $classMain
-     * @param string|null $idFilter
-     * @param string|null $groupInput
-     * @return type
-     */
     public function blocSelectAddLine(
         string $nameIn,
         string $urlAjax,
@@ -260,6 +235,7 @@ class ComponentBuilder
         ?string $idFilter = null,
         ?string $groupInput = null
     ) {
+        $disabledtype = in_array($disabledtype, ['disabled', 'readonly']) ? $disabledtype : "";
         $asterisco = ($required) ? "*" : "";
         $requiredIf = ($required) ? "Sim" : "";
         $descolorido = ($disabledtype === "disabled") ? "caixaTransp" : "";
@@ -283,16 +259,8 @@ class ComponentBuilder
 
     /**
      * 
-     * @param string $post
-     * @param array|null $inValue
-     * @param string $title
-     * @param string $nameIn
      * @param array $arrValue           $arrValue = ['Ativo', 'Inativo'];<br>
      *                                  $arrValue = [[1, 'Ativo'], [2, 'Inativo']];<br>
-     * @param string $required
-     * @param string $nameClass
-     * @param string $classMain
-     * @param string|null $attrNew
      * @return string
      */
     public function blocRadio(
@@ -305,11 +273,17 @@ class ComponentBuilder
         ?string $nameClass = null,
         ?string $classMain = null,
         bool $fullWidth = false,
-        ?string $attrNew = null
+        ?string $attrNew = null,
+        array $attributes = [],
     ): string {
         $asterisco = ($required) ? "*" : "";
         $requiredIf = ($required) ? "Sim" : "";
         $titleQuestion = ($this->right($title, 1) === "?") ? $title : $title . ":";
+
+        $extraAttributes = "";
+        foreach ($attributes as $attr => $value) {
+            $extraAttributes .= "{$attr}='{$value}' ";
+        }
 
         $render = "<div class='caixa caixaCheck {$classMain}' {$attrNew} style='" . ($fullWidth ? "width: 100%;" : "") . "'>"
             . "<label class='labelForm'>{$asterisco}{$titleQuestion}</label>"
@@ -333,7 +307,9 @@ class ComponentBuilder
                 . "id='in{$nameIn}{$i}' "
                 . "obrigatorio='{$requiredIf}' "
                 . "bloqenv='{$requiredIf}' "
-                . "value='{$value[0]}' {$checkedActual}>"
+                . "value='{$value[0]}' "
+                . "{$extraAttributes} "
+                . "{$checkedActual}> "
                 . "<label for='in{$nameIn}{$i}'>{$value[1]}</label></div>";
             $i++;
         }
@@ -369,15 +345,8 @@ class ComponentBuilder
     }
 
     /**
-     * blocCheckbox
-     * @param string $post
-     * @param array $inValue
-     * @param string $title
-     * @param string $nameIn
      * @param array $arrValue           $arrValue = ['Ativo', 'Inativo'];<br>
      *                                  $arrValue = [[1, 'Ativo'], [2, 'Inativo']];<br>
-     * @param string $nomeclasse
-     * @param string $classPrincipal
      * @return string
      */
     public function blocCheckbox(
@@ -421,21 +390,12 @@ class ComponentBuilder
     }
 
     /**
-     * 
-     * @param string $title
-     * @param string $nameIn
      * @param array|null $tblSearch          $tblSearch = ["Everton", "Bryan", "Fernanda"];<br>
      *                                       $tblSearch = [["1", "Everton"], ["2", "Bryan"], ["3", "Fernanda"]];<br>
      *                                       $tblSearch = (new UsuaLeftJoin())->findByActive();<br>
-     * @param string|int|array|null $inValue
      * @param string $description       Se $tblSearch vir do banco preciso definir o campo que será o option
      * @param string $varValue          Se $tblSearch vir do banco preciso definir o campo  que será o value do option
-     * @param bool $required
      * @param string $typeDisabled      pode ser 'disabled' ou 'readonly'
-     * @param bool $multiple
-     * @param bool $firstWhite
-     * @param string $classExtra
-     * @param string $classMain
      * @return string
      */
     public function blocSelect(
@@ -516,15 +476,6 @@ class ComponentBuilder
         return $render;
     }
 
-    /**
-     * 
-     * @param string $value
-     * @param string $name
-     * @param bool $required
-     * @param string|null $disabledType         'disabled' ou 'readonly'
-     * @param string|null $classExtra
-     * @return type
-     */
     public function funBlocoTextarea(
         ?string $value,
         string $name,
@@ -532,8 +483,8 @@ class ComponentBuilder
         ?string $disabledType = null,
         ?string $classExtra = null
     ): string {
+        $disabledType = in_array($disabledType, ['disabled', 'readonly']) ? $disabledType : "";
         $retorno = "<textarea name='{$name}' " . ($required ? "required" : "") . " {$disabledType} class='caixaTextarea {$classExtra}'>{$value}</textarea>";
-
         return $retorno;
     }
 
