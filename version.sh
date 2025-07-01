@@ -53,9 +53,9 @@ if [[ "$confirm" =~ ^[sS]$ ]]; then
     set_new_version "$NEW_VERSION"
     git add .
     git commit -m "Versão $NEW_VERSION"
-    git tag "$NEW_VERSION"
+    git tag -a $NEW_VERSION -m "Versão $NEW_VERSION"
     git push
-    git git push --tags
+    git push --tags
     echo "✅ Versão $NEW_VERSION publicada com sucesso!"
 else
     echo "❌ Operação cancelada."
