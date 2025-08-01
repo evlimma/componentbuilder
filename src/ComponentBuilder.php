@@ -6,7 +6,7 @@ use EvLimma\ComponentBuilder\GenericFunction;
 
 class ComponentBuilder
 {
-    use GenericFunction;
+    use Helpers;
 
     public function titleBar(string $descricao, bool $accordion = false, ?string $classExtra = null, ?string $id = null): string
     {
@@ -185,7 +185,7 @@ class ComponentBuilder
         ?string $classPrincipal = null,
         ?string $idFilter = null,
         bool $typeSelect = false,
-        bool $megaPopup = false,
+        ?string $megaPopup = null,
         ?string $placeholder = null,
         string $requiredView = "*"
     ) {
@@ -210,6 +210,7 @@ class ComponentBuilder
             . "<input id='in{$nameIn}' type='hidden' class='seletorCampo' name='in{$nameIn}' value='{$inSeq}' />"
             . "<input id='txt{$nameIn}' "
             . "type='text' "
+            . "megaPopup='{$megaPopup}' "
             . "placeholder='{$placeholder}' "
             . "class='inputForm PesquisarDb {$pesquisarDbJs} {$classExtra} {$descolorido} {$clickTypeSelect} {$megaPopupClass}' "
             . "autocomplete='off' name='txt{$nameIn}' {$varDesabilitadoTipo} "

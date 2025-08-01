@@ -2,7 +2,7 @@
 
 namespace evlimma\ComponentBuilder;
 
-trait GenericFunction
+trait Helpers
 {
     /**
      * Retorna os últimos $count caracteres da string.
