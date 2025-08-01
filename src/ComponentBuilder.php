@@ -2,7 +2,7 @@
 
 namespace evlimma\ComponentBuilder;
 
-use EvLimma\ComponentBuilder\GenericFunction;
+use EvLimma\ComponentBuilder\Helpers;
 
 class ComponentBuilder
 {
