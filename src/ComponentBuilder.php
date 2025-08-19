@@ -262,6 +262,7 @@ class ComponentBuilder
      * 
      * @param array $arrValue           $arrValue = ['Ativo', 'Inativo'];<br>
      *                                  $arrValue = [[1, 'Ativo'], [2, 'Inativo']];<br>
+     * @param string $typeDisabled      pode ser 'disabled' ou 'readonly'
      * @return string
      */
     public function blocRadio(
@@ -276,10 +277,12 @@ class ComponentBuilder
         bool $fullWidth = false,
         ?string $attrNew = null,
         array $attributes = [],
+        ?string $disabledType = null,
     ): string {
         $asterisco = ($required) ? "*" : "";
         $requiredIf = ($required) ? "Sim" : "";
         $titleQuestion = ($this->right($title, 1) === "?") ? $title : $title . ":";
+        $descolorido = $disabledType ? "caixaTransp" : "";
 
         $extraAttributes = "";
         foreach ($attributes as $attr => $value) {
@@ -287,35 +290,36 @@ class ComponentBuilder
         }
 
         $render = "<div class='caixa caixaCheck {$classMain}' {$attrNew} style='" . ($fullWidth ? "width: 100%;" : "") . "'>"
-            . "<label class='labelForm'>{$asterisco}{$titleQuestion}</label>"
-            . "<aside>";
-        $i = 0;
-        foreach ($arrValue as $list) {
-            $value = (is_array($arrValue[0])) ? [$list[0], $list[1]] : [$list, $list];
+                    . "<label class='labelForm {$descolorido}'>{$asterisco}{$titleQuestion}</label>"
+                    . "<aside>";
 
-            $checkedActual = null;
-            if ($inValue !== null) {
-                $checkedActual = ($inValue == $value[0] ? "checked" : "");
-            } else if (!$post && $i === 0) {
-                $checkedActual = "checked";
-            }
+                        $i = 0;
+                        foreach ($arrValue as $list) {
+                            $value = (is_array($arrValue[0])) ? [$list[0], $list[1]] : [$list, $list];
 
-            $render .= "<div>"
-                . "<input "
-                . "type='radio' "
-                . "class='{$nameClass}' "
-                . "name='in{$nameIn}' "
-                . "id='in{$nameIn}{$i}' "
-                . "obrigatorio='{$requiredIf}' "
-                . "bloqenv='{$requiredIf}' "
-                . "value='{$value[0]}' "
-                . "{$extraAttributes} "
-                . "{$checkedActual}> "
-                . "<label for='in{$nameIn}{$i}'>{$value[1]}</label></div>";
-            $i++;
-        }
+                            $checkedActual = null;
+                            if ($inValue !== null) {
+                                $checkedActual = ($inValue == $value[0] ? "checked" : "");
+                            } else if (!$post && $i === 0) {
+                                $checkedActual = "checked";
+                            }
 
-        $render .= "</aside>
+                            $render .= "<div>"
+                                . "<input "
+                                . "type='radio' "
+                                . "class='{$nameClass} {$descolorido}' "
+                                . "name='in{$nameIn}' "
+                                . "id='in{$nameIn}{$i}' "
+                                . "obrigatorio='{$requiredIf}' "
+                                . "bloqenv='{$requiredIf}' "
+                                . "value='{$value[0]}' "
+                                . "{$extraAttributes} "
+                                . "{$disabledType} {$checkedActual}> "
+                                . "<label class='{$descolorido}' for='in{$nameIn}{$i}'>{$value[1]}</label></div>";
+                            $i++;
+                        }
+
+        $render .= "    </aside>
                     </div>";
 
         return $render;
