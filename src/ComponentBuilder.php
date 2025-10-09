@@ -187,7 +187,8 @@ class ComponentBuilder
         bool $typeSelect = false,
         ?string $megaPopup = null,
         ?string $placeholder = null,
-        string $requiredView = "*"
+        string $requiredView = "*",
+        ?string $information = null
     ) {
         $disabledType = in_array($disabledType, ['disabled', 'readonly']) ? $disabledType : "";
         $asterisco = ($required) ? $requiredView : "";
@@ -198,6 +199,7 @@ class ComponentBuilder
         $varDesabilitadoTipo = ($typeSelect) ? "readonly" : $disabledType;
         $clickTypeSelect = ($typeSelect) ? "clickTypeSelect" : "";
         $megaPopupClass = ($megaPopup) ? "megaPopup" : null;
+        $tagInformation = $information ? "<figure class='ico_information'> <span class='balloon'>{$information}</span></figure>" : null;
 
         $render = (!$title ? "" : "<div class='caixa {$classPrincipal}'>")
             . "<button type='button' class='LupaPesquisaDb {$classTypeSelect} {$megaPopupClass}'></button>"
@@ -206,7 +208,7 @@ class ComponentBuilder
             . "<li>Carregando...</li>"
             . "</ul>"
 
-            . (!$title ? "" : "<label id='la{$nameIn}' class='labelForm {$descolorido}' for='txt{$nameIn}'>{$asterisco}{$title}:</label>")
+            . (!$title ? "" : "<label id='la{$nameIn}' class='labelForm {$descolorido}' for='txt{$nameIn}'>{$asterisco}{$title}:{$tagInformation}</label>")
             . "<input id='in{$nameIn}' type='hidden' class='seletorCampo' name='in{$nameIn}' value='{$inSeq}' />"
             . "<input id='txt{$nameIn}' "
             . "type='text' "
