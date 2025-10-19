@@ -188,7 +188,8 @@ class ComponentBuilder
         ?string $megaPopup = null,
         ?string $placeholder = null,
         string $requiredView = "*",
-        ?string $information = null
+        ?string $information = null,
+        array $attributes = [],
     ) {
         $disabledType = in_array($disabledType, ['disabled', 'readonly']) ? $disabledType : "";
         $asterisco = ($required) ? $requiredView : "";
@@ -200,6 +201,11 @@ class ComponentBuilder
         $clickTypeSelect = ($typeSelect) ? "clickTypeSelect" : "";
         $megaPopupClass = ($megaPopup) ? "megaPopup" : null;
         $tagInformation = $information ? "<figure class='ico_information'> <span class='balloon'>{$information}</span></figure>" : null;
+
+        $extraAttributes = "";
+        foreach ($attributes as $attr => $value) {
+            $extraAttributes .= "{$attr}='{$value}' ";
+        }
 
         $render = (!$title ? "" : "<div class='caixa {$classPrincipal}'>")
             . "<button type='button' class='LupaPesquisaDb {$classTypeSelect} {$megaPopupClass}'></button>"
@@ -213,7 +219,7 @@ class ComponentBuilder
             . "<input id='txt{$nameIn}' "
             . "type='text' "
             . "megaPopup='{$megaPopup}' "
-            . "placeholder='{$placeholder}' "
+            . "placeholder='{$placeholder}' {$extraAttributes} "
             . "class='inputForm PesquisarDb {$pesquisarDbJs} {$classExtra} {$descolorido} {$clickTypeSelect} {$megaPopupClass}' "
             . "autocomplete='off' name='txt{$nameIn}' {$varDesabilitadoTipo} "
             . "url='{$urlAjax}' idFilter='{$idFilter}' "
