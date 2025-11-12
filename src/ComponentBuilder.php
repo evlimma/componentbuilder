@@ -66,6 +66,10 @@ class ComponentBuilder
      * @param string|null $attrNew
      * @param bool|null $btUpload
      * @param string|null $btNewTable
+     * @param array $attributes
+     * @param string|null $placeholder
+     * @param string $requiredView
+     * @param string|null $width                 Largura opcional do campo (ex.: '100%', '320px'). Retrocompatível: se não informado, nada muda.
      * @return string
      */
     public function blocText(
@@ -89,7 +93,8 @@ class ComponentBuilder
         ?string $btNewTable = null,
         array $attributes = [],
         ?string $placeholder = null,
-        string $requiredView = "*"
+        string $requiredView = "*",
+        ?string $width = null
     ) {
         $asterisco = ($required) ? $requiredView : "";
         $requiredIf = ($required) ? "Sim" : "";
@@ -113,7 +118,15 @@ class ComponentBuilder
             $extraAttributes .= "{$attr}='{$value}' ";
         }
 
-        $render = !$title ? "" : "<div class='caixa {$classPrincipal}' {$attrNew} style='" . ($fullWidth ? "width: 100%;" : "") . "'>";
+        // Define estilo da caixa quando houver título (wrapper) e respeita fullWidth/width
+        $containerStyle = "";
+        if ($fullWidth) {
+            $containerStyle = "width: 100%;";
+        } else if (!empty($width)) {
+            $containerStyle = "width: {$width};";
+        }
+		
+        $render = !$title ? "" : "<div class='caixa {$classPrincipal}' {$attrNew} style='{$containerStyle}'>";
         $iconRight = null;
 
         if ($balloon) {
@@ -148,15 +161,30 @@ class ComponentBuilder
 
         $render .= (($maskMoeda) ? "<span class='Rcifrao {$descolorido} {$corFonteAlterar}'>R$</span>" : "");
 
+        // Estilos inline do campo (quando necessário). Só aplica background-image se houver ícone
+        $inlineStyles = [];
+        if (!empty($iconLeft)) {
+            $inlineStyles[] = "background-image: url(\"{$iconLeft}\")";
+        }
+        // Se não há wrapper (sem título), aplica width diretamente no campo
+        if (!$title) {
+            if ($fullWidth) {
+                $inlineStyles[] = "width: 100%";
+            } else if (!empty($width)) {
+                $inlineStyles[] = "width: {$width}";
+            }
+        }
+        $styleAttr = !empty($inlineStyles) ? "style='" . implode("; ", $inlineStyles) . ";'" : "";
+
         if ($type === "textarea") {
-            $render .= "<textarea class='inputTextarea {$activeIconLeft} {$iconRight} {$classExtra} {$descolorido}' "
+            $render .= "<textarea {$styleAttr} class='inputTextarea {$activeIconLeft} {$iconRight} {$classExtra} {$descolorido}' "
                 . "name='{$nameIn}' {$disabledType} "
                 . "obrigatorio='{$requiredIf}' bloqEnv='{$requiredIf}' "
                 . "{$extraAttributes}>"
                 . "{$inValue}"
                 . "</textarea>";
         } else {
-            $render .= "<input style='background-image: {$iconLeftImg};'"
+            $render .= "<input {$styleAttr} "
                 . "type='{$typeIf}' "
                 . "id='in{$nameIn}' "
                 . "class='inputForm {$activeIconLeft} {$iconRight} {$classExtra} " . ($passwordRevelation ? "icoRight" : "") . " {$descolorido} {$descoloridoFile} " . (($maskMoeda) ? "maskMoney" : "") . " {$maskKm}' "
@@ -409,6 +437,7 @@ class ComponentBuilder
      * @param string $description       Se $tblSearch vir do banco preciso definir o campo que será o option
      * @param string $varValue          Se $tblSearch vir do banco preciso definir o campo  que será o value do option
      * @param string $typeDisabled      pode ser 'disabled' ou 'readonly'
+     * @param array $attributes         Atributos extras para o <select> (ex.: ["data-x" => "y"]). Retrocompatível
      * @return string
      */
     public function blocSelect(
@@ -424,7 +453,8 @@ class ComponentBuilder
         bool $firstWhite = false,
         ?string $classExtra = null,
         ?string $classMain = null,
-        ?string $information = null
+        ?string $information = null,
+        array $attributes = []
     ): string {
         $asterisk = ($required) ? "*" : "";
         $requiredTag = ($required) ? "Sim" : "";
@@ -452,6 +482,12 @@ class ComponentBuilder
         $selectDisabled = $typeDisabled ? "disabled" : "";
         $tagInformation = $information ? "<figure class='ico_information'> <span class='balloon'>{$information}</span></figure>" : null;
 
+        // Monta atributos extras
+        $extraAttributes = "";
+        foreach ($attributes as $attr => $value) {
+            $extraAttributes .= " {$attr}='{$value}'";
+        }
+
         $render = "<div class='caixa {$classMain}'>
                         <label class='labelForm {$discolored}' for='in{$nameIn}'>
                             {$asterisk}{$titleQuestion}{$tagInformation}
@@ -465,7 +501,7 @@ class ComponentBuilder
                                 {$selectDisabled}
                                 obrigatorio='{$requiredTag}'
                                 bloqEnv='{$requiredTag}'
-                                {$multipleActive}>
+                                {$multipleActive} {$extraAttributes}>
                             {$firstWhiteTag}";
 
         if ($tblSearch) {
