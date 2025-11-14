@@ -218,6 +218,7 @@ class ComponentBuilder
         string $requiredView = "*",
         ?string $information = null,
         array $attributes = [],
+        bool $untied = false
     ) {
         $disabledType = in_array($disabledType, ['disabled', 'readonly']) ? $disabledType : "";
         $asterisco = ($required) ? $requiredView : "";
@@ -229,6 +230,7 @@ class ComponentBuilder
         $clickTypeSelect = ($typeSelect) ? "clickTypeSelect" : "";
         $megaPopupClass = ($megaPopup) ? "megaPopup" : null;
         $tagInformation = $information ? "<figure class='ico_information'> <span class='balloon'>{$information}</span></figure>" : null;
+        $untied = $untied ? "true" : "false";
 
         $extraAttributes = "";
         foreach ($attributes as $attr => $value) {
@@ -245,7 +247,7 @@ class ComponentBuilder
             . (!$title ? "" : "<label id='la{$nameIn}' class='labelForm {$descolorido}' for='txt{$nameIn}'>{$asterisco}{$title}:{$tagInformation}</label>")
             . "<input id='in{$nameIn}' type='hidden' class='seletorCampo' name='in{$nameIn}' value='{$inSeq}' />"
             . "<input id='txt{$nameIn}' "
-            . "type='text' "
+            . "type='text' untied='{$untied}' "
             . "megaPopup='{$megaPopup}' "
             . "placeholder='{$placeholder}' {$extraAttributes} "
             . "class='inputForm PesquisarDb {$pesquisarDbJs} {$classExtra} {$descolorido} {$clickTypeSelect} {$megaPopupClass}' "
