@@ -94,7 +94,8 @@ class ComponentBuilder
         array $attributes = [],
         ?string $placeholder = null,
         string $requiredView = "*",
-        ?string $width = null
+        ?string $width = null,
+        ?string $information = null
     ) {
         $asterisco = ($required) ? $requiredView : "";
         $requiredIf = ($required) ? "Sim" : "";
@@ -105,6 +106,7 @@ class ComponentBuilder
         $corFonteAlterar = (($corFonteVermelha != "") ? $corFonteVermelha : $corFonteVerde);
         $autoCompleteHTML = ($autoComplete) ? "" : "autocomplete='off' readonly onfocus=\"this.removeAttribute('readonly'); this.select();\"";
         $titleQuestion = ($this->right($title, 1) === "?") ? $title : $title . ":";
+        $tagInformation = $information ? "<figure class='ico_information'> <span class='balloon'>{$information}</span></figure>" : null;
         $descoloridoFile = null;
 
         $typeIf = in_array($type, ["moeda", "km"]) ? "text" : $type;
@@ -125,7 +127,7 @@ class ComponentBuilder
         } else if (!empty($width)) {
             $containerStyle = "width: {$width};";
         }
-		
+
         $render = !$title ? "" : "<div class='caixa {$classPrincipal}' {$attrNew} style='{$containerStyle}'>";
         $iconRight = null;
 
@@ -155,7 +157,7 @@ class ComponentBuilder
 
         if ($title) {
             $render .= "<label for='in{$nameIn}' class='labelForm {$descolorido}'>";
-            $render .= ($btNewTable ? "<a href='{$btNewTable}' target='_blank' class='abrirNovaAba'>{$asterisco}{$title}:</a>" : "{$asterisco}{$titleQuestion}");
+            $render .= ($btNewTable ? "<a href='{$btNewTable}' target='_blank' class='abrirNovaAba'>{$asterisco}{$title}:</a>" : "{$asterisco}{$titleQuestion}{$tagInformation}");
             $render .= "</label>";
         }
 
@@ -218,7 +220,9 @@ class ComponentBuilder
         string $requiredView = "*",
         ?string $information = null,
         array $attributes = [],
-        bool $untied = false
+        bool $untied = false,
+        bool $nameArray = false,
+        bool $uniqueField = true,
     ) {
         $disabledType = in_array($disabledType, ['disabled', 'readonly']) ? $disabledType : "";
         $asterisco = ($required) ? $requiredView : "";
@@ -237,6 +241,39 @@ class ComponentBuilder
             $extraAttributes .= "{$attr}='{$value}' ";
         }
 
+        $fieldAsArray = (!$uniqueField) || $nameArray;
+
+        $idNameIn = $nameIn;
+        $nameAttrSuffix = "";
+
+        if ($nameArray) {
+            $baseName = $nameIn;
+            $counterToken = null;
+
+            if (strpos($baseName, "[") !== false) {
+                $baseName = (string) strtok($baseName, "[");
+                if (preg_match('/\[(.*?)\]/', $nameIn, $m)) {
+                    $counterToken = $m[1] ?? null;
+                }
+            }
+
+            $baseName = trim((string) $baseName);
+
+            static $arrayFieldCounters = [];
+            $arrayFieldCounters[$baseName] = ($arrayFieldCounters[$baseName] ?? 0) + 1;
+            $counter = ($counterToken !== null && $counterToken !== "") ? $counterToken : (string) $arrayFieldCounters[$baseName];
+
+            $idNameIn = $baseName . $counter;
+            $nameAttrSuffix = "[]";
+            $nameIn = $baseName;
+        } elseif ($fieldAsArray) {
+            $idNameIn = str_replace(["[", "]"], ["_", ""], $idNameIn);
+            while (strpos($idNameIn, "__") !== false) {
+                $idNameIn = str_replace("__", "_", $idNameIn);
+            }
+            $idNameIn = trim($idNameIn, "_");
+        }
+
         $render = (!$title ? "" : "<div class='caixa {$classPrincipal}'>")
             . "<button type='button' class='LupaPesquisaDb {$classTypeSelect} {$megaPopupClass}'></button>"
             . ($megaPopup ? "<button type='button' class='LupaPesquisaDb tblPesquisaLab btMegaPopup'></button>" : null)
@@ -244,14 +281,14 @@ class ComponentBuilder
             . "<li>Carregando...</li>"
             . "</ul>"
 
-            . (!$title ? "" : "<label id='la{$nameIn}' class='labelForm {$descolorido}' for='txt{$nameIn}'>{$asterisco}{$title}:{$tagInformation}</label>")
-            . "<input id='in{$nameIn}' type='hidden' class='seletorCampo' name='in{$nameIn}' value='{$inSeq}' />"
-            . "<input id='txt{$nameIn}' "
+            . (!$title ? "" : "<label id='la{$idNameIn}' class='labelForm {$descolorido}' for='txt{$idNameIn}'>{$asterisco}{$title}:{$tagInformation}</label>")
+            . "<input id='in{$idNameIn}' type='hidden' class='seletorCampo' name='in{$nameIn}{$nameAttrSuffix}' value='{$inSeq}' />"
+            . "<input id='txt{$idNameIn}' "
             . "type='text' untied='{$untied}' "
             . "megaPopup='{$megaPopup}' "
             . "placeholder='{$placeholder}' {$extraAttributes} "
             . "class='inputForm PesquisarDb {$pesquisarDbJs} {$classExtra} {$descolorido} {$clickTypeSelect} {$megaPopupClass}' "
-            . "autocomplete='off' name='txt{$nameIn}' {$varDesabilitadoTipo} "
+            . "autocomplete='off' name='txt{$nameIn}{$nameAttrSuffix}' {$varDesabilitadoTipo} "
             . "url='{$urlAjax}' idFilter='{$idFilter}' "
             . "valorBanco='{$inValue}' "
             . "obrigatorio='{$requiredIf}' bloqenv='{$requiredIf}' "
@@ -328,34 +365,34 @@ class ComponentBuilder
         }
 
         $render = "<div class='caixa caixaCheck {$classMain}' {$attrNew} style='" . ($fullWidth ? "width: 100%;" : "") . "'>"
-                    . "<label class='labelForm {$descolorido}'>{$asterisco}{$titleQuestion}</label>"
-                    . "<aside>";
+            . "<label class='labelForm {$descolorido}'>{$asterisco}{$titleQuestion}</label>"
+            . "<aside>";
 
-                        $i = 0;
-                        foreach ($arrValue as $list) {
-                            $value = (is_array($arrValue[0])) ? [$list[0], $list[1]] : [$list, $list];
+        $i = 0;
+        foreach ($arrValue as $list) {
+            $value = (is_array($arrValue[0])) ? [$list[0], $list[1]] : [$list, $list];
 
-                            $checkedActual = null;
-                            if ($inValue !== null) {
-                                $checkedActual = ($inValue == $value[0] ? "checked" : "");
-                            } else if (!$post && $i === 0) {
-                                $checkedActual = "checked";
-                            }
+            $checkedActual = null;
+            if ($inValue !== null) {
+                $checkedActual = ($inValue == $value[0] ? "checked" : "");
+            } else if (!$post && $i === 0) {
+                $checkedActual = "checked";
+            }
 
-                            $render .= "<div>"
-                                . "<input "
-                                . "type='radio' "
-                                . "class='{$nameClass} {$descolorido}' "
-                                . "name='in{$nameIn}' "
-                                . "id='in{$nameIn}{$i}' "
-                                . "obrigatorio='{$requiredIf}' "
-                                . "bloqenv='{$requiredIf}' "
-                                . "value='{$value[0]}' "
-                                . "{$extraAttributes} "
-                                . "{$disabledType} {$checkedActual}> "
-                                . "<label class='{$descolorido}' for='in{$nameIn}{$i}'>{$value[1]}</label></div>";
-                            $i++;
-                        }
+            $render .= "<div>"
+                . "<input "
+                . "type='radio' "
+                . "class='{$nameClass} {$descolorido}' "
+                . "name='in{$nameIn}' "
+                . "id='in{$nameIn}{$i}' "
+                . "obrigatorio='{$requiredIf}' "
+                . "bloqenv='{$requiredIf}' "
+                . "value='{$value[0]}' "
+                . "{$extraAttributes} "
+                . "{$disabledType} {$checkedActual}> "
+                . "<label class='{$descolorido}' for='in{$nameIn}{$i}'>{$value[1]}</label></div>";
+            $i++;
+        }
 
         $render .= "    </aside>
                     </div>";
