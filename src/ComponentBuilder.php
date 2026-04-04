@@ -227,7 +227,9 @@ class ComponentBuilder
         $disabledType = in_array($disabledType, ['disabled', 'readonly']) ? $disabledType : "";
         $asterisco = ($required) ? $requiredView : "";
         $requiredIf = ($required) ? "Sim" : "";
-        $descolorido = ($disabledType != "") ? "caixaTransp" : "";
+        $descolorido = !empty($disabledType) ? "caixaTransp" : "";
+        $buttonTransp = !empty($disabledType) ? "buttonTransp" : null;
+        $buttonDisabled = !empty($disabledType) ? "disabled" : null;
         $pesquisarDbJs = ($disabledType) ? "" : "PesquisarDbJs";
         $classTypeSelect = ($typeSelect) ? "setaSelect" : "LupaPesquisaLab";
         $varDesabilitadoTipo = ($typeSelect) ? "readonly" : $disabledType;
@@ -275,8 +277,8 @@ class ComponentBuilder
         }
 
         $render = (!$title ? "" : "<div class='caixa {$classPrincipal}'>")
-            . "<button type='button' class='LupaPesquisaDb {$classTypeSelect} {$megaPopupClass}'></button>"
-            . ($megaPopup ? "<button type='button' class='LupaPesquisaDb tblPesquisaLab btMegaPopup'></button>" : null)
+            . "<button type='button' {$buttonDisabled} class='LupaPesquisaDb {$classTypeSelect} {$megaPopupClass} {$buttonTransp}'></button>"
+            . ($megaPopup ? "<button type='button' {$buttonDisabled} class='LupaPesquisaDb tblPesquisaLab btMegaPopup {$buttonTransp}'></button>" : null)
             . "<ul class='MenuSuspensoDb'>"
             . "<li>Carregando...</li>"
             . "</ul>"
@@ -480,9 +482,9 @@ class ComponentBuilder
      * @return string
      */
     public function blocSelect(
-        string $title,
         string $nameIn,
-        ?array $tblSearch,
+        ?string $title = null,
+        ?array $tblSearch = null,
         string|array|null $inValue = null,
         ?string $description = null,
         ?string $varValue = null,
@@ -500,7 +502,7 @@ class ComponentBuilder
         $discolored = ($typeDisabled) ? "caixaTransp" : "";
         $multipleActive = (($multiple) ? "multiple" : "");
         $firstWhiteTag = (($firstWhite) ? "<option></option>" : "");
-        $titleQuestion = ($this->right($title, 1) === "?") ? $title : $title . ":";
+        $titleQuestion = $title ? (($this->right($title, 1) === "?") ? $title : $title . ":") : "";
         $optionDescription = ($description) ?? "DESCRIPTION";
         $optionValue = ($varValue) ?? "VALUE";
 
@@ -527,12 +529,14 @@ class ComponentBuilder
             $extraAttributes .= " {$attr}='{$value}'";
         }
 
-        $render = "<div class='caixa {$classMain}'>
+        $render = $title
+            ? "<div class='caixa {$classMain}'>
                         <label class='labelForm {$discolored}' for='in{$nameIn}'>
                             {$asterisk}{$titleQuestion}{$tagInformation}
-                        </label>
+                        </label>"
+            : "<div class='caixa {$classMain}'>";
 
-                        {$inputHidden}
+        $render .= "    {$inputHidden}
 
                         <select class='{$classExtra} {$discolored}'
                                 name='{$selectName}'
