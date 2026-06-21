@@ -277,8 +277,8 @@ class ComponentBuilder
         }
 
         $render = (!$title ? "" : "<div class='caixa {$classPrincipal}'>")
-            . "<button type='button' {$buttonDisabled} class='LupaPesquisaDb {$classTypeSelect} {$megaPopupClass} {$buttonTransp}'></button>"
-            . ($megaPopup ? "<button type='button' {$buttonDisabled} class='LupaPesquisaDb tblPesquisaLab btMegaPopup {$buttonTransp}'></button>" : null)
+            . "<button type='button' {$buttonDisabled} class='LupaPesquisaDbCss {$classTypeSelect} {$megaPopupClass} {$buttonTransp}'></button>"
+            . ($megaPopup ? "<button type='button' {$buttonDisabled} class='LupaPesquisaDbCss tblPesquisaLabJs btMegaPopupCss {$buttonTransp}'></button>" : null)
             . "<ul class='MenuSuspensoDb'>"
             . "<li>Carregando...</li>"
             . "</ul>"
